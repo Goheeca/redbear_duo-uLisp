@@ -36,8 +36,8 @@ static const char string11[] PROGMEM = "defun";
 static const char string12[] PROGMEM = "defvar";
 static const char string13[] PROGMEM = "setq";
 static const char string14[] PROGMEM = "loop";
-static const char string15[] PROGMEM = "push_";
-static const char string16[] PROGMEM = "pop_";
+static const char string15[] PROGMEM = "push";
+static const char string16[] PROGMEM = "pop";
 static const char string17[] PROGMEM = "incf";
 static const char string18[] PROGMEM = "decf";
 static const char string19[] PROGMEM = "setf";
@@ -71,8 +71,8 @@ static const char string42[] PROGMEM = "cons";
 static const char string43[] PROGMEM = "atom";
 static const char string44[] PROGMEM = "listp";
 static const char string45[] PROGMEM = "consp";
-static const char string46[] PROGMEM = "symbolp_";
-static const char string47[] PROGMEM = "streamp_";
+static const char string46[] PROGMEM = "symbolp";
+static const char string47[] PROGMEM = "streamp";
 static const char string48[] PROGMEM = "eq";
 
 FREEZE_LIST

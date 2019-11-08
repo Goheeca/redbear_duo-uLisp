@@ -122,7 +122,7 @@ void pfl (pfun_t pfun) {
 }
 
 void printobject (object *form, pfun_t pfun){
-  if (form == NULL) pfstring(PSTR("nil_"), pfun);
+  if (form == NULL) pfstring(PSTR("nil"), pfun);
   else if (listp(form) && issymbol(car_(form), CLOSURE)) pfstring(PSTR("<closure>"), pfun);
   else if (listp(form)) {
     pfun('(');

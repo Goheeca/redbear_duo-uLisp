@@ -39,20 +39,20 @@ object *fn_mapcan (object *args, object *env);
     REIFY(list_, no, fn, min_arg, max_arg)
 
 #define FREEZE_LIST \
-    FREEZE_LI(car_, "car_"); \
-    FREEZE_LI(first_, "first_"); \
-    FREEZE_LI(cdr_, "cdr_"); \
+    FREEZE_LI(car_, "car"); \
+    FREEZE_LI(first_, "first"); \
+    FREEZE_LI(cdr_, "cdr"); \
     FREEZE_LI(rest, "rest"); \
     FREEZE_LI(caar, "caar"); \
     FREEZE_LI(cadr, "cadr"); \
-    FREEZE_LI(second_, "second_"); \
+    FREEZE_LI(second_, "second"); \
     FREEZE_LI(cdar, "cdar"); \
-    FREEZE_LI(cddr_, "cddr_"); \
+    FREEZE_LI(cddr_, "cddr"); \
     FREEZE_LI(caaar, "caaar"); \
     FREEZE_LI(caadr, "caadr"); \
     FREEZE_LI(cadar, "cadar"); \
     FREEZE_LI(caddr, "caddr"); \
-    FREEZE_LI(third_, "third_"); \
+    FREEZE_LI(third_, "third"); \
     FREEZE_LI(cdaar, "cdaar"); \
     FREEZE_LI(cdadr, "cdadr"); \
     FREEZE_LI(cddar, "cddar"); \
@@ -67,7 +67,7 @@ object *fn_mapcan (object *args, object *env);
     FREEZE_LI(funcall, "funcall"); \
     FREEZE_LI(append, "append"); \
     FREEZE_LI(mapc, "mapc"); \
-    FREEZE_LI(mapcar_, "mapcar_"); \
+    FREEZE_LI(mapcar_, "mapcar"); \
     FREEZE_LI(mapcan, "mapcan");
 
 #define REIFY_LIST \

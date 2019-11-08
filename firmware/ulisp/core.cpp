@@ -414,18 +414,18 @@ object **place (symbol_t name, object *args, object *env) {
   object* function = first_(args);
   if (issymbol(function, CAR) || issymbol(function, FIRST)) {
     object *value = eval(second_(args), env);
-    if (!listp(value)) error(name, PSTR("can't take car_"), value);
+    if (!listp(value)) error(name, PSTR("can't take car"), value);
     return &car_(value);
   }
   if (issymbol(function, CDR) || issymbol(function, REST)) {
     object *value = eval(second_(args), env);
-    if (!listp(value)) error(name, PSTR("can't take cdr_"), value);
+    if (!listp(value)) error(name, PSTR("can't take cdr"), value);
     return &cdr_(value);
   }
   if (issymbol(function, NTH)) {
     int index = checkinteger(NTH, eval(second_(args), env));
     object *list = eval(third_(args), env);
-    if (atom(list)) error(name, PSTR("second_ argument to nth is not a list"), list);
+    if (atom(list)) error(name, PSTR("second argument to nth is not a list"), list);
     while (index > 0) {
       list = cdr_(list);
       if (list == NULL) error2(name, PSTR("index to nth is out of range"));
