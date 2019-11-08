@@ -14,7 +14,10 @@
 #include "../arithmetics.h"
 #include "../char_string.h"
 #include "../logic.h"
+#include "../gc.h"
 #include "../hw/machine.h"
+#include "../editor.h"
+#include "../lisp_library.h"
 
 FREEZE(core_, nil_, "nil_");
 FREEZE(core_, t, "t");
@@ -107,8 +110,10 @@ FREEZE_MACHINE
 static const char string173[] PROGMEM = "edit";
 static const char string174[] PROGMEM = "pprint";
 static const char string175[] PROGMEM = "pprintall";
+#if defined(lisplibrary)
 static const char string176[] PROGMEM = "require";
 static const char string177[] PROGMEM = "list-library";
+#endif
 
 static const tbl_entry_t lookup_table[] PROGMEM = {
   REIFY(core_, nil_, NULL, 0, 0),
@@ -202,8 +207,10 @@ static const tbl_entry_t lookup_table[] PROGMEM = {
   { string173, fn_edit, 1, 1 },
   { string174, fn_pprint, 1, 2 },
   { string175, fn_pprintall, 0, 0 },
+#if defined(lisplibrary)
   { string176, fn_require, 1, 1 },
   { string177, fn_listlibrary, 0, 0 },
+#endif
 };
 
 // Table lookup functions

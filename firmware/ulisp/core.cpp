@@ -19,6 +19,8 @@ unsigned int Freespace = 0;
 object *Freelist;
 char *SymbolTop = SymbolTable;
 
+object *tee;
+
 unsigned int TraceFn[TRACEMAX];
 unsigned int TraceDepth[TRACEMAX];
 

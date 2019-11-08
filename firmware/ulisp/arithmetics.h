@@ -133,7 +133,7 @@ object *fn_round (object *args, object *env);
     REIFY_AR(less, fn_less, 1, CALL_ARGUMENTS_LIMIT), \
     REIFY_AR(lesseq, fn_lesseq, 1, CALL_ARGUMENTS_LIMIT), \
     REIFY_AR(greater, fn_greater, 1, CALL_ARGUMENTS_LIMIT), \
-    REIFY_AR(greater_eq, fn_greatereq, 1, CALL_ARGUMENTS_LIMIT), \
+    REIFY_AR(greatereq, fn_greatereq, 1, CALL_ARGUMENTS_LIMIT), \
     REIFY_AR(plusp, fn_plusp, 1, 1), \
     REIFY_AR(minusp, fn_minusp, 1, 1), \
     REIFY_AR(zerop, fn_zerop, 1, 1), \

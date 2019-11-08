@@ -1,4 +1,5 @@
 #include "i2c.h"
+#include "../stream.h"
 
 // I2C interface
 

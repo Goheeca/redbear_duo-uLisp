@@ -34,16 +34,17 @@ int SDReadInt (File file) {
 #else
 
 void FlashSetup () {
-  FLASH_Unlock();
   uint16_t Status;
-  for (int page = Eeprom; page < 0x8020000; page = page + 0x400) {
-    Status = FLASH_ErasePage(page);
+  for (int page = Eeprom; page < 0x8020000; page = page + 0x1000) {
+    sFLASH.eraseSector(page - Eeprom);
+    Status = FLASH_COMPLETE;
     if (Status != FLASH_COMPLETE) error2(SAVEIMAGE, PSTR("flash erase failed"));
   }
 }
 
 void FlashWrite16 (unsigned int *addr, uint16_t data) {
-  uint16_t Status = FLASH_ProgramHalfWord((*addr) + Eeprom, data);
+  sFLASH.writeBuffer((const uint8_t *) &data, (uint32_t) addr, 2);
+  uint16_t Status = FLASH_COMPLETE;
   if (Status != FLASH_COMPLETE) error2(SAVEIMAGE, PSTR("flash write failed"));
   (*addr) = (*addr) + 2;
 }
@@ -53,7 +54,8 @@ void FlashWriteInt (unsigned int *addr, int data) {
 }
 
 uint16_t FlashRead16 (unsigned int *addr) {
-  uint16_t data = (*(__IO uint16*)((*addr) + Eeprom));
+  uint16_t data;
+  sFLASH.readBuffer((uint8_t *) &data, (uint32_t) addr, 2);
   (*addr) = (*addr) + 2;
   return data;
 }

@@ -1,4 +1,5 @@
 #include "serial.h"
+#include "../print.h"
 #include <Particle.h>
 
 #if defined(SERIAL1)

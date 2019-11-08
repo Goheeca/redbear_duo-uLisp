@@ -46,7 +46,7 @@
   #define WORKSPACESIZE 1130              /* Cells (8*bytes) */
   #define SYMBOLTABLESIZE 512             /* Bytes - must be even*/
   #define EEPROMSIZE (184*4096)
-  uint8_t _end;
+  extern uint8_t _end;
 
 #endif
 

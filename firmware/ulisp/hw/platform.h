@@ -13,4 +13,6 @@
 typedef int BitOrder;
 #define SPISettings __SPISettings
 
+#define WiringPinMode PinMode
+
 #endif
