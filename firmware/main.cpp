@@ -5,7 +5,7 @@ SYSTEM_MODE(MANUAL)
 
 void setup () {
   Serial.begin(9600);
-  while (!Serial);
+  waitUntil(Serial.isConnected);
   ulisp_setup();
 }
 
