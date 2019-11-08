@@ -1,6 +1,8 @@
 #include "Particle.h"
 #include "ulisp/ulisp.h"
 
+SYSTEM_THREAD(ENABLED)
+
 void setup () {
   Serial.begin(9600);
   while (!Serial);

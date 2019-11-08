@@ -19,7 +19,7 @@
 #include "../editor.h"
 #include "../lisp_library.h"
 
-FREEZE(core_, nil_, "nil_");
+FREEZE(core_, nil_, "nil");
 FREEZE(core_, t, "t");
 FREEZE(core_, nothing, "nothing");
 FREEZE(core_, ampoptional, "&optional");
