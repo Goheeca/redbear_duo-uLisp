@@ -3,18 +3,10 @@
 
    Licensed under the MIT license: https://opensource.org/licenses/MIT
 */
+#include "ulisp-stm32.h"
 
 // Lisp Library
 const char LispLibrary[] PROGMEM = "";
-
-// Compile options
-
-// #define resetautorun
-#define printfreespace
-#define serialmonitor
-// #define printgcs
-// #define sdcardsupport
-// #define lisplibrary
 
 // Includes
 
@@ -23,7 +15,7 @@ const char LispLibrary[] PROGMEM = "";
 #include <SPI.h>
 #include <Wire.h>
 #include <limits.h>
-#include <EEPROM.h>
+// #include <EEPROM.h>
 
 #if defined(sdcardsupport)
 #include <SD.h>
@@ -49,7 +41,7 @@ const char LispLibrary[] PROGMEM = "";
 #define integerp(x)        ((x) != NULL && (x)->type == NUMBER)
 #define floatp(x)          ((x) != NULL && (x)->type == FLOAT)
 #define symbolp(x)         ((x) != NULL && (x)->type == SYMBOL)
-#define stringp(x)         ((x) != NULL && (x)->type == STRING)
+#define stringp(x)         ((x) != NULL && (x)->type == STRING_)
 #define characterp(x)      ((x) != NULL && (x)->type == CHARACTER)
 #define streamp(x)         ((x) != NULL && (x)->type == STREAM)
 
@@ -58,14 +50,14 @@ const char LispLibrary[] PROGMEM = "";
 #define marked(x)          ((((uintptr_t)(car(x))) & MARKBIT) != 0)
 #define MARKBIT            1
 
-#define setflag(x)         (Flags = Flags | 1<<(x))
-#define clrflag(x)         (Flags = Flags & ~(1<<(x)))
-#define tstflag(x)         (Flags & 1<<(x))
+#define setflag(x)         (Flags_ = Flags_ | 1<<(x))
+#define clrflag(x)         (Flags_ = Flags_ & ~(1<<(x)))
+#define tstflag(x)         (Flags_ & 1<<(x))
 
 // Constants
 
 const int TRACEMAX = 3; // Number of traced functions
-enum type { ZERO=0, SYMBOL=2, NUMBER=4, STREAM=6, CHARACTER=8, FLOAT=10, STRING=12, PAIR=14 };  // STRING and PAIR must be last
+enum type { ZERO=0, SYMBOL=2, NUMBER=4, STREAM=6, CHARACTER=8, FLOAT=10, STRING_=12, PAIR=14 };  // STRING_ and PAIR must be last
 enum token { UNUSED, BRA, KET, QUO, DOT };
 enum stream { SERIALSTREAM, I2CSTREAM, SPISTREAM, SDSTREAM };
 
@@ -84,40 +76,6 @@ LOCALS, MAKUNBOUND, BREAK, READ, PRIN1, PRINT, PRINC, TERPRI, READBYTE, READLINE
 WRITELINE, RESTARTI2C, GC, ROOM, SAVEIMAGE, LOADIMAGE, CLS, PINMODE, DIGITALREAD, DIGITALWRITE,
 ANALOGREAD, ANALOGWRITE, DELAY, MILLIS, SLEEP, NOTE, EDIT, PPRINT, PPRINTALL, REQUIRE, LISTLIBRARY, ENDFUNCTIONS };
 
-// Typedefs
-
-typedef unsigned int symbol_t;
-
-typedef struct sobject {
-  union {
-    struct {
-      sobject *car;
-      sobject *cdr;
-    };
-    struct {
-      unsigned int type;
-      union {
-        symbol_t name;
-        int integer;
-        float single_float;
-      };
-    };
-  };
-} object;
-
-typedef object *(*fn_ptr_type)(object *, object *);
-
-typedef struct {
-  const char *string;
-  fn_ptr_type fptr;
-  uint8_t min;
-  uint8_t max;
-} tbl_entry_t;
-
-typedef int (*gfun_t)();
-typedef void (*pfun_t)(char);
-typedef int PinMode;
-
 // Workspace
 #define PERSIST __attribute__((section(".text")))
 #define WORDALIGNED __attribute__((aligned (4)))
@@ -134,6 +92,12 @@ typedef int PinMode;
   #define EEPROMSIZE 10240                /* Bytes */
   #define SYMBOLTABLESIZE 512             /* Bytes - must be even*/
   uint8_t _end;
+
+#else                                     /* TODO #define REDBEAR_DUO */
+  #define WORKSPACESIZE 1130              /* Cells (8*bytes) */
+  #define SYMBOLTABLESIZE 512             /* Bytes - must be even*/
+  #define EEPROMSIZE (184*4096)
+  extern uint8_t _end;
 
 #endif
 
@@ -158,9 +122,9 @@ char BreakLevel = 0;
 char LastChar = 0;
 char LastPrint = 0;
 
-// Flags
+// Flags_
 enum flag { PRINTREADABLY, RETURNFLAG, ESCAPE, EXITEDITOR, LIBRARYLOADED, NOESC };
-volatile char Flags = 0b00001; // PRINTREADABLY set by default
+volatile char Flags_ = 0b00001; // PRINTREADABLY set by default
 
 // Forward references
 object *tee;
@@ -272,7 +236,7 @@ void markobject (object *obj) {
     goto MARK;
   }
 
-  if (type == STRING) {
+  if (type == STRING_) {
     obj = cdr(obj);
     while (obj != NULL) {
       arg = car(obj);
@@ -312,7 +276,7 @@ void movepointer (object *from, object *to) {
   for (int i=0; i<WORKSPACESIZE; i++) {
     object *obj = &Workspace[i];
     unsigned int type = (obj->type) & ~MARKBIT;
-    if (marked(obj) && (type >= STRING || type==ZERO)) {
+    if (marked(obj) && (type >= STRING_ || type==ZERO)) {
       if (car(obj) == (object *)((uintptr_t)from | MARKBIT))
         car(obj) = (object *)((uintptr_t)to | MARKBIT);
       if (cdr(obj) == from) cdr(obj) = to;
@@ -321,7 +285,7 @@ void movepointer (object *from, object *to) {
   // Fix strings
   for (int i=0; i<WORKSPACESIZE; i++) {
     object *obj = &Workspace[i];
-    if (marked(obj) && ((obj->type) & ~MARKBIT) == STRING) {
+    if (marked(obj) && ((obj->type) & ~MARKBIT) == STRING_) {
       obj = cdr(obj);
       while (obj != NULL) {
         if (cdr(obj) == to) cdr(obj) = from;
@@ -380,16 +344,17 @@ void SDWriteInt (File file, int data) {
 }
 #else
 void FlashSetup () {
-  FLASH_Unlock();
   uint16_t Status;
-  for (int page = Eeprom; page < 0x8020000; page = page + 0x400) {
-    Status = FLASH_ErasePage(page);
+  for (int page = Eeprom; page < 0x8020000; page = page + 0x1000) {
+    sFLASH.eraseSector(page - Eeprom);
+    Status = FLASH_COMPLETE;
     if (Status != FLASH_COMPLETE) error2(SAVEIMAGE, PSTR("flash erase failed"));
   }
 }
 
 void FlashWrite16 (unsigned int *addr, uint16_t data) {
-  uint16_t Status = FLASH_ProgramHalfWord((*addr) + Eeprom, data);
+  sFLASH.writeBuffer((const uint8_t *) &data, (uint32_t) addr, 2);
+  uint16_t Status = FLASH_COMPLETE;
   if (Status != FLASH_COMPLETE) error2(SAVEIMAGE, PSTR("flash write failed"));
   (*addr) = (*addr) + 2;
 }
@@ -461,7 +426,8 @@ int SDReadInt (File file) {
 }
 #else
 uint16_t FlashRead16 (unsigned int *addr) {
-  uint16_t data = (*(__IO uint16*)((*addr) + Eeprom));
+  uint16_t data;
+  sFLASH.readBuffer((uint8_t *) &data, (uint32_t) addr, 2);
   (*addr) = (*addr) + 2;
   return data;
 }
@@ -787,7 +753,7 @@ void buildstring (char ch, int *chars, object **head) {
 
 object *readstring (char delim, gfun_t gfun) {
   object *obj = myalloc();
-  obj->type = STRING;
+  obj->type = STRING_;
   int ch = gfun();
   if (ch == -1) return nil;
   object *head = NULL;
@@ -2516,9 +2482,9 @@ object *fn_stringfn (object *args, object *env) {
   (void) env;
   object *arg = first(args);
   int type = arg->type;
-  if (type == STRING) return arg;
+  if (type == STRING_) return arg;
   object *obj = myalloc();
-  obj->type = STRING;
+  obj->type = STRING_;
   if (type == CHARACTER) {
     object *cell = myalloc();
     cell->car = NULL;
@@ -2547,12 +2513,12 @@ object *fn_concatenate (object *args, object *env) {
   if (name != STRINGFN) error2(CONCATENATE, PSTR("only supports strings"));
   args = cdr(args);
   object *result = myalloc();
-  result->type = STRING;
+  result->type = STRING_;
   object *head = NULL;
   int chars = 0;
   while (args != NULL) {
     object *obj = first(args);
-    if (obj->type != STRING) error(CONCATENATE, notastring, obj);
+    if (obj->type != STRING_) error(CONCATENATE, notastring, obj);
     obj = cdr(obj);
     while (obj != NULL) {
       int quad = obj->integer;
@@ -2578,7 +2544,7 @@ object *fn_subseq (object *args, object *env) {
   args = cddr(args);
   if (args != NULL) end = checkinteger(SUBSEQ, car(args)); else end = stringlength(arg);
   object *result = myalloc();
-  result->type = STRING;
+  result->type = STRING_;
   object *head = NULL;
   int chars = 0;
   for (int i=start; i<end; i++) {
@@ -2617,13 +2583,13 @@ object *fn_princtostring (object *args, object *env) {
   (void) env;
   object *arg = first(args);
   object *obj = myalloc();
-  obj->type = STRING;
+  obj->type = STRING_;
   GlobalString = NULL;
   GlobalStringIndex = 0;
-  char temp = Flags;
+  char temp = Flags_;
   clrflag(PRINTREADABLY);
   printobject(arg, pstr);
-  Flags = temp;
+  Flags_ = temp;
   obj->cdr = GlobalString;
   return obj;
 }
@@ -2632,7 +2598,7 @@ object *fn_prin1tostring (object *args, object *env) {
   (void) env;
   object *arg = first(args);
   object *obj = myalloc();
-  obj->type = STRING;
+  obj->type = STRING_;
   GlobalString = NULL;
   GlobalStringIndex = 0;
   printobject(arg, pstr);
@@ -2754,10 +2720,10 @@ object *fn_princ (object *args, object *env) {
   (void) env;
   object *obj = first(args);
   pfun_t pfun = pstreamfun(cdr(args));
-  char temp = Flags;
+  char temp = Flags_;
   clrflag(PRINTREADABLY);
   printobject(obj, pfun);
-  Flags = temp;
+  Flags_ = temp;
   return obj;
 }
 
@@ -2793,10 +2759,10 @@ object *fn_writestring (object *args, object *env) {
   (void) env;
   object *obj = first(args);
   pfun_t pfun = pstreamfun(cdr(args));
-  char temp = Flags;
+  char temp = Flags_;
   clrflag(PRINTREADABLY);
   printstring(obj, pfun);
-  Flags = temp;
+  Flags_ = temp;
   return nil;
 }
 
@@ -2804,11 +2770,11 @@ object *fn_writeline (object *args, object *env) {
   (void) env;
   object *obj = first(args);
   pfun_t pfun = pstreamfun(cdr(args));
-  char temp = Flags;
+  char temp = Flags_;
   clrflag(PRINTREADABLY);
   printstring(obj, pfun);
   pln(pfun);
-  Flags = temp;
+  Flags_ = temp;
   return nil;
 }
 
@@ -4038,9 +4004,7 @@ void initenv () {
   tee = symbol(TEE);
 }
 
-void setup () {
-  Serial.begin(9600);
-  while (!Serial);
+void ulisp_setup () {
   initworkspace();
   initenv();
   initsleep();
@@ -4075,7 +4039,7 @@ void repl (object *env) {
   }
 }
 
-void loop () {
+void ulisp_loop () {
   End = 0xA5;      // Canary to check stack
   if (!setjmp(exception)) {
     #if defined(resetautorun)
@@ -4087,6 +4051,11 @@ void loop () {
   }
   // Come here after error
   delay(100); while (Serial.available()) Serial.read();
+  ulisp_reset();
+  repl(NULL);
+}
+
+void ulisp_reset() {
   for (int i=0; i<TRACEMAX; i++) TraceDepth[i] = 0;
   #if defined(sdcardsupport)
   SDpfile.close(); SDgfile.close();
@@ -4094,5 +4063,4 @@ void loop () {
   #if defined(lisplibrary)
   if (!tstflag(LIBRARYLOADED)) { setflag(LIBRARYLOADED); loadfromlibrary(NULL); }
   #endif
-  repl(NULL);
 }
