@@ -94,7 +94,7 @@ ANALOGREAD, ANALOGWRITE, DELAY, MILLIS, SLEEP, NOTE, EDIT, PPRINT, PPRINTALL, RE
   uint8_t _end;
 
 #else                                     /* TODO #define REDBEAR_DUO */
-  #define WORKSPACESIZE 6392              /* Cells (8*bytes) */
+  #define WORKSPACESIZE 3000              /* Cells (8*bytes) */
   #define SYMBOLTABLESIZE 512             /* Bytes - must be even*/
   #define EEPROMSIZE (184*4096)
   extern uint8_t _end;

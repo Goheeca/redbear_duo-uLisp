@@ -1,7 +1,8 @@
 #include <Particle.h>
 #include "ulisp/ulisp-stm32.h"
 
-SYSTEM_MODE(MANUAL)
+SYSTEM_MODE(AUTOMATIC)
+SYSTEM_THREAD(ENABLED)
 
 void setup () {
   Serial.begin(9600);
