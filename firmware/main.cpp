@@ -1,5 +1,5 @@
 #include "Particle.h"
-#include "ulisp/ulisp.h"
+#include "ulisp/ulisp-stm32.ino"
 
 SYSTEM_MODE(MANUAL)
 
