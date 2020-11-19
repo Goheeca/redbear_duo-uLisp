@@ -2877,7 +2877,7 @@ object *edit (object *fun) {
     if (c == 'q') setflag(EXITEDITOR);
     else if (c == 'b') return fun;
     else if (c == 'r') fun = read(gserial);
-    else if (c == '\n') { pfl(pserial); superprint(fun, 0, pserial); pln(pserial); }
+    else if (c == '\n' || c == '\r') { pfl(pserial); superprint(fun, 0, pserial); pln(pserial); }
     else if (c == 'c') fun = cons(read(gserial), fun);
     else if (atom(fun)) pserial('!');
     else if (c == 'd') fun = cons(car(fun), edit(cdr(fun)));
@@ -3795,7 +3795,7 @@ int gserial () {
   }
   while (!Serial.available());
   char temp = Serial.read();
-  if (temp != '\n') pserial(temp);
+  if (temp != '\n' && temp != '\r') pserial(temp);
   return temp;
 }
 
