@@ -5,10 +5,8 @@
 */
 #include "ulisp-stm32.h"
 
-// Lisp Library
-const char LispLibrary[] PROGMEM = "";
-
-// Includes
+// Insert your own function definitions here
+#include "ulisp-c-library.h"
 
 // #include "LispLibrary.h"
 #include <setjmp.h>
@@ -17,64 +15,14 @@ const char LispLibrary[] PROGMEM = "";
 #include <limits.h>
 // #include <EEPROM.h>
 
+#define NO_RETURN return 0;
+
 #if defined(sdcardsupport)
 #include <SD.h>
 #define SDSIZE 172
 #else
 #define SDSIZE 0
 #endif
-
-// C Macros
-
-#define nil                NULL
-#define car(x)             (((object *) (x))->car)
-#define cdr(x)             (((object *) (x))->cdr)
-
-#define first(x)           (((object *) (x))->car)
-#define second(x)          (car(cdr(x)))
-#define cddr(x)            (cdr(cdr(x)))
-#define third(x)           (car(cdr(cdr(x))))
-
-#define push(x, y)         ((y) = cons((x),(y)))
-#define pop(y)             ((y) = cdr(y))
-
-#define integerp(x)        ((x) != NULL && (x)->type == NUMBER)
-#define floatp(x)          ((x) != NULL && (x)->type == FLOAT)
-#define symbolp(x)         ((x) != NULL && (x)->type == SYMBOL)
-#define stringp(x)         ((x) != NULL && (x)->type == STRING_)
-#define characterp(x)      ((x) != NULL && (x)->type == CHARACTER)
-#define streamp(x)         ((x) != NULL && (x)->type == STREAM)
-
-#define mark(x)            (car(x) = (object *)(((uintptr_t)(car(x))) | MARKBIT))
-#define unmark(x)          (car(x) = (object *)(((uintptr_t)(car(x))) & ~MARKBIT))
-#define marked(x)          ((((uintptr_t)(car(x))) & MARKBIT) != 0)
-#define MARKBIT            1
-
-#define setflag(x)         (Flags_ = Flags_ | 1<<(x))
-#define clrflag(x)         (Flags_ = Flags_ & ~(1<<(x)))
-#define tstflag(x)         (Flags_ & 1<<(x))
-
-// Constants
-
-const int TRACEMAX = 3; // Number of traced functions
-enum type { ZERO=0, SYMBOL=2, NUMBER=4, STREAM=6, CHARACTER=8, FLOAT=10, STRING_=12, PAIR=14 };  // STRING_ and PAIR must be last
-enum token { UNUSED, BRA, KET, QUO, DOT };
-enum stream { SERIALSTREAM, I2CSTREAM, SPISTREAM, SDSTREAM };
-
-enum function { NIL, TEE, NOTHING, OPTIONAL, AMPREST, LAMBDA, LET, LETSTAR, CLOSURE, SPECIAL_FORMS, QUOTE,
-DEFUN, DEFVAR, SETQ, LOOP, RETURN, PUSH, POP, INCF, DECF, SETF, DOLIST, DOTIMES, TRACE, UNTRACE,
-FORMILLIS, WITHSERIAL, WITHI2C, WITHSPI, WITHSDCARD, TAIL_FORMS, PROGN, IF, COND, WHEN, UNLESS, CASE, AND,
-OR, FUNCTIONS, NOT, NULLFN, CONS, ATOM, LISTP, CONSP, SYMBOLP, STREAMP, EQ, CAR, FIRST, CDR, REST, CAAR,
-CADR, SECOND, CDAR, CDDR, CAAAR, CAADR, CADAR, CADDR, THIRD, CDAAR, CDADR, CDDAR, CDDDR, LENGTH, LIST,
-REVERSE, NTH, ASSOC, MEMBER, APPLY, FUNCALL, APPEND, MAPC, MAPCAR, MAPCAN, ADD, SUBTRACT, MULTIPLY,
-DIVIDE, MOD, ONEPLUS, ONEMINUS, ABS, RANDOM, MAXFN, MINFN, NOTEQ, NUMEQ, LESS, LESSEQ, GREATER, GREATEREQ,
-PLUSP, MINUSP, ZEROP, ODDP, EVENP, INTEGERP, NUMBERP, FLOATFN, FLOATP, SIN, COS, TAN, ASIN, ACOS, ATAN,
-SINH, COSH, TANH, EXP, SQRT, LOG, EXPT, CEILING, FLOOR, TRUNCATE, ROUND, CHAR, CHARCODE, CODECHAR,
-CHARACTERP, STRINGP, STRINGEQ, STRINGLESS, STRINGGREATER, SORT, STRINGFN, CONCATENATE, SUBSEQ,
-READFROMSTRING, PRINCTOSTRING, PRIN1TOSTRING, LOGAND, LOGIOR, LOGXOR, LOGNOT, ASH, LOGBITP, EVAL, GLOBALS,
-LOCALS, MAKUNBOUND, BREAK, READ, PRIN1, PRINT, PRINC, TERPRI, READBYTE, READLINE, WRITEBYTE, WRITESTRING,
-WRITELINE, RESTARTI2C, GC, ROOM, SAVEIMAGE, LOADIMAGE, CLS, PINMODE, DIGITALREAD, DIGITALWRITE,
-ANALOGREAD, ANALOGWRITE, DELAY, MILLIS, SLEEP, NOTE, EDIT, PPRINT, PPRINTALL, REQUIRE, LISTLIBRARY, ENDFUNCTIONS };
 
 // Workspace
 #define PERSIST __attribute__((section(".text")))
@@ -106,6 +54,8 @@ char SymbolTable[SYMBOLTABLESIZE];
 
 // Global variables
 
+object *tee;
+
 jmp_buf exception;
 unsigned int Freespace = 0;
 object *Freelist;
@@ -125,19 +75,6 @@ char LastPrint = 0;
 // Flags_
 enum flag { PRINTREADABLY, RETURNFLAG, ESCAPE, EXITEDITOR, LIBRARYLOADED, NOESC };
 volatile char Flags_ = 0b00001; // PRINTREADABLY set by default
-
-// Forward references
-object *tee;
-object *tf_progn (object *form, object *env);
-object *eval (object *form, object *env);
-object *read ();
-void repl(object *env);
-void printobject (object *form, pfun_t pfun);
-char *lookupbuiltin (symbol_t name);
-intptr_t lookupfn (symbol_t name);
-int builtin (char* n);
-void error (symbol_t fname, PGM_P string, object *symbol);
-void error2 (symbol_t fname, PGM_P string);
 
 // Set up workspace
 
@@ -653,6 +590,7 @@ float checkintfloat (symbol_t name, object *obj){
   if (integerp(obj)) return obj->integer;
   if (floatp(obj)) return obj->single_float;
   error(name, notanumber, obj);
+  NO_RETURN
 }
 
 int checkchar (symbol_t name, object *obj) {
@@ -1916,6 +1854,7 @@ object *negate (object *arg) {
     else return number(-result);
   } else if (floatp(arg)) return makefloat(-(arg->single_float));
   else error(SUBTRACT, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_subtract (object *args, object *env) {
@@ -1939,6 +1878,7 @@ object *fn_subtract (object *args, object *env) {
     }
     return number(result);
   } else error(SUBTRACT, notanumber, arg);
+  NO_RETURN
 }
 
 object *multiply_floats (object *args, float fresult) {
@@ -2013,6 +1953,7 @@ object *fn_divide (object *args, object *env) {
     }
     return number(result);
   } else error(DIVIDE, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_mod (object *args, object *env) {
@@ -2045,6 +1986,7 @@ object *fn_oneplus (object *args, object *env) {
     if (result == INT_MAX) return makefloat((arg->integer) + 1.0);
     else return number(result + 1);
   } else error(ONEPLUS, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_oneminus (object *args, object *env) {
@@ -2056,6 +1998,7 @@ object *fn_oneminus (object *args, object *env) {
     if (result == INT_MIN) return makefloat((arg->integer) - 1.0);
     else return number(result - 1);
   } else error(ONEMINUS, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_abs (object *args, object *env) {
@@ -2067,6 +2010,7 @@ object *fn_abs (object *args, object *env) {
     if (result == INT_MIN) return makefloat(abs((float)result));
     else return number(abs(result));
   } else error(ABS, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_random (object *args, object *env) {
@@ -2075,6 +2019,7 @@ object *fn_random (object *args, object *env) {
   if (integerp(arg)) return number(random(arg->integer));
   else if (floatp(arg)) return makefloat((float)rand()/(float)(RAND_MAX/(arg->single_float)));
   else error(RANDOM, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_maxfn (object *args, object *env) {
@@ -2206,6 +2151,7 @@ object *fn_plusp (object *args, object *env) {
   if (floatp(arg)) return ((arg->single_float) > 0.0) ? tee : nil;
   else if (integerp(arg)) return ((arg->integer) > 0) ? tee : nil;
   else error(PLUSP, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_minusp (object *args, object *env) {
@@ -2214,6 +2160,7 @@ object *fn_minusp (object *args, object *env) {
   if (floatp(arg)) return ((arg->single_float) < 0.0) ? tee : nil;
   else if (integerp(arg)) return ((arg->integer) < 0) ? tee : nil;
   else error(MINUSP, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_zerop (object *args, object *env) {
@@ -2222,6 +2169,7 @@ object *fn_zerop (object *args, object *env) {
   if (floatp(arg)) return ((arg->single_float) == 0.0) ? tee : nil;
   else if (integerp(arg)) return ((arg->integer) == 0) ? tee : nil;
   else error(ZEROP, notanumber, arg);
+  NO_RETURN
 }
 
 object *fn_oddp (object *args, object *env) {
@@ -3080,8 +3028,6 @@ object *fn_listlibrary (object *args, object *env) {
   return symbol(NOTHING);
 }
 
-// Insert your own function definitions here
-
 // Built-in procedure names - stored in PROGMEM
 
 const char string0[] PROGMEM = "nil";
@@ -3442,6 +3388,7 @@ const tbl_entry_t lookup_table[] PROGMEM = {
   { string175, fn_pprintall, 0, 0 },
   { string176, fn_require, 1, 1 },
   { string177, fn_listlibrary, 0, 0 },
+  LOOKUP_TABLE_ENTRIES
 };
 
 // Table lookup functions
