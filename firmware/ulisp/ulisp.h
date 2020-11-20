@@ -17,10 +17,6 @@ typedef PinMode WiringPinMode;
 // #define sdcardsupport
 #define lisplibrary
 
-// Lisp Library
-extern const char LispLibrary[] PROGMEM;
-
-
 #include <stdint.h>
 #include <setjmp.h>
 typedef uint16_t uint16;

@@ -1,5 +1,5 @@
 #include <Particle.h>
-#include "ulisp/ulisp-stm32.h"
+#include "ulisp/ulisp.h"
 
 SYSTEM_MODE(AUTOMATIC)
 SYSTEM_THREAD(ENABLED)

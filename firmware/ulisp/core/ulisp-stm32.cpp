@@ -3,10 +3,14 @@
 
    Licensed under the MIT license: https://opensource.org/licenses/MIT
 */
-#include "ulisp-stm32.h"
+#include "../ulisp.h"
 
 // Insert your own function definitions here
 #include "ulisp-c-library.h"
+#define STRINGIFY(code) #code
+const char LispLibrary[] PROGMEM = STRINGIFY(
+#include "../library.lisp"
+;
 
 // #include "LispLibrary.h"
 #include <setjmp.h>
