@@ -1,3 +1,30 @@
+[![μλ](http://www.ulisp.com/pictures/3J/logo.gif)](http://www.ulisp.com/)
+
+# [uLisp 3.0](http://www.ulisp.com/) for RedBear Duo
+
+uLisp (Copyright (c) 2016-2020 David Johnson-Davies) is a remarkable implementation of lisp, this is a port to RedBear Duo and possibly other boards from the [particle.io](https://www.particle.io/) family.
+
+## Customization
+
+* Lisp -- Go to `firmware/ulisp/library.lisp` and amend the lisp code, note the include directive at the end is essential.
+
+* FFI -- Go to `firmware/ulisp/library.cpp`, this file consists of two sections the header and the implementation:
+  * Header -- add the following: an enumeration constant into `function_` before `ENDFUNCTIONS`, a forward declaration of your custom function, a forward declaration of the string holding the symbolic name of your function, a new lookup entry (the last columns are argument count restrictions),
+  * Body -- implement your custom functions and their symbolic names.
+
+## The REPL of μλ
+
+* Entering: `po serial monitor`
+* Leaving: `Ctrl+a d` (it's `screen`)
+
+### TODO
+
+- [ ] Check peripherals and make them available in μλ
+- [ ] Adding [FatFs](http://elm-chan.org/fsw/ff/00index_e.html)
+- [ ] Image loading & saving using FAT
+- [ ] Expose the Particle API to μλ
+
+---
 [![Built with po-util](https://rawgit.com/nrobinson2000/po-util/master/images/built-with-po-util.svg)](https://po-util.com)
 
 # This repository is a [po-util](https://po-util.com) project
