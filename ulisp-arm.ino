@@ -3615,7 +3615,17 @@ object *fn_subseq (object *args, object *env) {
   return result;
 }
 
-object *fn_readfromstring (object *args, object *env) {   
+int gstr () {
+  if (LastChar) {
+    char temp = LastChar;
+    LastChar = 0;
+    return temp;
+  }
+  char c = nthchar(GlobalString, GlobalStringIndex++);
+  return (c != 0) ? c : '\n'; // -1?
+}
+
+object *fn_readfromstring (object *args, object *env) {
   (void) env;
   object *arg = first(args);
   if (!stringp(arg)) error(READFROMSTRING, notastring, arg);
@@ -3624,7 +3634,11 @@ object *fn_readfromstring (object *args, object *env) {
   return read(gstr);
 }
 
-object *fn_princtostring (object *args, object *env) {   
+void pstr (char c) {
+  buildstring(c, &GlobalStringIndex, &GlobalString);
+}
+
+object *fn_princtostring (object *args, object *env) {
   (void) env;
   object *arg = first(args);
   object *obj = startstring(PRINCTOSTRING);
