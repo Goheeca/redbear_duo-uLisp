@@ -14,8 +14,8 @@ extern const char string_fn_poke[] PROGMEM;
 #undef LOOKUP_TABLE_ENTRIES
 #endif
 #define LOOKUP_TABLE_ENTRIES \
-    { string_fn_peek, fn_peek, 1, 1 }, \
-    { string_fn_poke, fn_poke, 2, 2 }, \
+    { string_fn_peek, fn_peek, 0x11 }, \
+    { string_fn_poke, fn_poke, 0x22 }, \
 
 #else // __ULISP_C_H
 

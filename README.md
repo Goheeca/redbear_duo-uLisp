@@ -1,8 +1,9 @@
 [![μλ](http://www.ulisp.com/pictures/3J/logo.gif)](http://www.ulisp.com/)
 
-# [uLisp 3.0](http://www.ulisp.com/) for RedBear Duo
+# [uLisp 3.3](http://www.ulisp.com/) for RedBear Duo
 
 uLisp (Copyright (c) 2016-2020 David Johnson-Davies) is a remarkable implementation of lisp, this is a port to RedBear Duo and possibly other boards from the [particle.io](https://www.particle.io/) family.
+This version is based on `ulisp-arm.ino`, because `ulisp-stm32.ino` is behind.
 
 ## Customization
 
