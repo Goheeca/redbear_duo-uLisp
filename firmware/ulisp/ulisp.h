@@ -13,11 +13,10 @@ typedef int BitOrder;
 // #define printgcs
 // #define sdcardsupport
 // #define gfxsupport
-// #define lisplibrary
-#define assemblerlist
-// #define lineeditor
-// #define vt100
 #define lisplibrary
+#define assemblerlist
+#define lineeditor
+#define vt100
 
 #include <stdint.h>
 #include <setjmp.h>
