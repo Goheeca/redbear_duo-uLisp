@@ -2316,7 +2316,10 @@ object *sp_error (object *args, object *env) {
     cons(symbol(FORMAT), cons(nil, args)),
     env);
   if (!tstflag(MUFFLEERRORS)) {
+    char temp = Flags_;
+    clrflag(PRINTREADABLY);
     pfstring(PSTR("Error: "), pserial); printstring(message, pserial);
+    Flags_ = temp;
     pln(pserial);
   }
   GCStack = NULL;
