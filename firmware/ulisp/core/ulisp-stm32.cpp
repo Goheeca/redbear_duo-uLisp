@@ -2266,20 +2266,24 @@ object *sp_unwindprotect (object *args, object *env) {
   handler = &dynamic_handler;
   object *protected_form = first(args);
   object *result;
+
+  bool signaled = false;
   if (!setjmp(dynamic_handler)) {
     result = eval(protected_form, env);
-    current_GCStack = NULL;
   } else {
     GCStack = current_GCStack;
-    handler = previous_handler;
+    signaled = true;
   }
+  handler = previous_handler;
+
   object *protective_forms = cdr(args);
   while (protective_forms != NULL) {
     eval(car(protective_forms),env);
     if (tstflag(RETURNFLAG)) break;
     protective_forms = cdr(protective_forms);
   }
-  if (current_GCStack) {
+
+  if (signaled) {
     GCStack = NULL;
     longjmp(*handler, 1);
   }
@@ -2293,20 +2297,23 @@ object *sp_ignoreerrors (object *args, object *env) {
   jmp_buf *previous_handler = handler;
   handler = &dynamic_handler;
   object *result = nil;
+
   setflag(MUFFLEERRORS);
+  bool signaled = false;
   if (!setjmp(dynamic_handler)) {
     while (args != NULL) {
       result = eval(car(args),env);
       if (tstflag(RETURNFLAG)) break;
       args = cdr(args);
     }
-    current_GCStack = NULL;
   } else {
     GCStack = current_GCStack;
-    handler = previous_handler;
+    signaled = true;
   }
+  handler = previous_handler;
   clrflag(MUFFLEERRORS);
-  if (current_GCStack) return symbol(NOTHING);
+
+  if (signaled) return symbol(NOTHING);
   else return result;
 }
 
