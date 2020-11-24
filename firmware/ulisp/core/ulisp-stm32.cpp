@@ -2298,6 +2298,7 @@ object *sp_ignoreerrors (object *args, object *env) {
   handler = &dynamic_handler;
   object *result = nil;
 
+  bool muffled = tstflag(MUFFLEERRORS);
   setflag(MUFFLEERRORS);
   bool signaled = false;
   if (!setjmp(dynamic_handler)) {
@@ -2311,7 +2312,7 @@ object *sp_ignoreerrors (object *args, object *env) {
     signaled = true;
   }
   handler = previous_handler;
-  clrflag(MUFFLEERRORS);
+  if (!muffled) clrflag(MUFFLEERRORS);
 
   if (signaled) return symbol(NOTHING);
   else return result;
