@@ -2,15 +2,17 @@
 
 // Insert your own function definitions here
 
-enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, ENDFUNCTIONS};
+enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, CALL_TEST, ENDFUNCTIONS};
 
 object *fn_peek (object *args, object *env);
 object *fn_poke (object *args, object *env);
 object *fn_publish (object *args, object *env);
+object *fn_call_test (object *args, object *env);
 
 extern const char string_fn_peek[] PROGMEM;
 extern const char string_fn_poke[] PROGMEM;
 extern const char string_fn_publish[] PROGMEM;
+extern const char string_fn_call_test[] PROGMEM;
 
 #ifdef LOOKUP_TABLE_ENTRIES
 #undef LOOKUP_TABLE_ENTRIES
@@ -19,6 +21,7 @@ extern const char string_fn_publish[] PROGMEM;
     { string_fn_peek, fn_peek, 0x11 }, \
     { string_fn_poke, fn_poke, 0x22 }, \
     { string_fn_publish, fn_publish, 0x22 }, \
+    { string_fn_call_test, fn_call_test, 0x11 }, \
 
 #else // __ULISP_C_H
 
@@ -39,6 +42,11 @@ object *fn_poke (object *args, object *env) {
   return val;
 }
 
+object *fn_call_test (object *args, object *env) {
+  char *buffer = "test";
+  object *form = cons(newsymbol(pack40(buffer)), cons(first(args), NULL));
+  return eval(form, env);
+}
 
 String STR_PARTICLE;
 void STR_PARTICLE_APPEND(char c) {
@@ -62,5 +70,6 @@ object *fn_publish (object *args, object *env) {
 const char string_fn_peek[] PROGMEM = "peek";
 const char string_fn_poke[] PROGMEM = "poke";
 const char string_fn_publish[] PROGMEM = "publish";
+const char string_fn_call_test[] PROGMEM = "call-test";
 
 #endif
