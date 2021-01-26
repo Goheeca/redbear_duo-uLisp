@@ -69,6 +69,7 @@ unsigned int I2CCount;
 unsigned int TraceFn[TRACEMAX];
 unsigned int TraceDepth[TRACEMAX];
 
+object *tee;
 object *GlobalEnv;
 object *GCStack = NULL;
 object *GlobalString;
@@ -83,7 +84,6 @@ enum flag { PRINTREADABLY, RETURNFLAG, ESCAPE, EXITEDITOR, LIBRARYLOADED, NOESC,
 volatile char Flags_ = 0b00001; // PRINTREADABLY set by default
 
 // Forward references
-object *tee;
 object *tf_progn (object *form, object *env);
 object *eval (object *form, object *env);
 object *read (gfun_t gfun);

@@ -189,10 +189,12 @@ void prin1object (object *form, pfun_t pfun);
 
 // Forward references
 
+extern object *tee;
 object *tf_progn (object *form, object *env);
 object *eval (object *form, object *env);
 object *read ();
 void repl(object *env);
+void prin1object (object *form, pfun_t pfun);
 void printobject (object *form, pfun_t pfun);
 char *lookupbuiltin (symbol_t name);
 intptr_t lookupfn (symbol_t name);
