@@ -60,8 +60,7 @@ object *fn_publish (object *args, object *env) {
     String channel = STR_PARTICLE;
     STR_PARTICLE = String("");
     printobject(second(args), STR_PARTICLE_APPEND);
-    Particle.publish(channel, STR_PARTICLE);
-    return tee;
+    return Particle.publish(channel, STR_PARTICLE) ? tee : nil;
   }
   return nil;
 }
