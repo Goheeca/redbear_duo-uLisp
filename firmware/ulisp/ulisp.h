@@ -192,7 +192,7 @@ void prin1object (object *form, pfun_t pfun);
 extern object *tee;
 object *tf_progn (object *form, object *env);
 object *eval (object *form, object *env);
-object *read ();
+object *read (gfun_t gfun);
 void repl(object *env);
 void prin1object (object *form, pfun_t pfun);
 void printobject (object *form, pfun_t pfun);

@@ -65,6 +65,22 @@ object *fn_publish (object *args, object *env) {
   return nil;
 }
 
+int STR_POSITION;
+const char *STR_READER;
+int string_reader () {
+  char c = STR_READER[STR_POSITION++];
+  return (c != 0) ? c : -1;
+}
+
+int fnc (String data) {
+    STR_POSITION = 0;
+    STR_READER = data.c_str();
+    object *lisp_data = read(string_reader);
+    object *form = cons(newsymbol(pack40("fnc")), cons(lisp_data, NULL));
+    object *result = eval(form, NULL);
+    return result == nil ? 0 : 1;
+}
+
 const char string_fn_peek[] PROGMEM = "peek";
 const char string_fn_poke[] PROGMEM = "poke";
 const char string_fn_publish[] PROGMEM = "publish";

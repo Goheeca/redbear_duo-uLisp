@@ -4,10 +4,13 @@
 SYSTEM_MODE(AUTOMATIC)
 SYSTEM_THREAD(ENABLED)
 
+int fnc(String data);
+
 void setup () {
   Serial.begin(9600);
   waitUntil(Serial.isConnected);
   ulisp_setup();
+  Particle.function("lisp", fnc);
 }
 
 void loop () {
