@@ -76,9 +76,12 @@ int fnc (String data) {
     STR_POSITION = 0;
     STR_READER = data.c_str();
     object *lisp_data = read(string_reader);
-    object *form = cons(newsymbol(pack40("fnc")), cons(lisp_data, NULL));
+    object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("fnc")), cons(lisp_data, NULL)), NULL));
     object *result = eval(form, NULL);
-    return result == nil ? 0 : 1;
+    if (symbolp(result) && result->name == NOTHING) {
+        return -1;
+    }
+    return result != nil ? 1 : 0;
 }
 
 const char string_fn_peek[] PROGMEM = "peek";
