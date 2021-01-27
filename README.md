@@ -23,7 +23,7 @@ This version is based on `ulisp-arm.ino`, because `ulisp-stm32.ino` is behind.
 - [ ] Check peripherals and make them available in μλ
 - [ ] Adding [FatFs](http://elm-chan.org/fsw/ff/00index_e.html)
 - [ ] Image loading & saving using FAT
-- [ ] Expose the Particle API to μλ
+- [x] Expose the Particle API to μλ
 
 ---
 [![Built with po-util](https://rawgit.com/nrobinson2000/po-util/master/images/built-with-po-util.svg)](https://po-util.com)
