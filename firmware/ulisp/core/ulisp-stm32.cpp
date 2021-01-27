@@ -696,7 +696,7 @@ int fromradix40 (int n) {
 
 int pack40 (const char *buffer) {
   int x = 0;
-  for (int i=0; i<6 && buffer[i]; i++) x = x * 40 + toradix40(buffer[i]);
+  for (int i=0; i<6; i++) x = x * 40 + toradix40(buffer[i]);
   return x;
 }
 
