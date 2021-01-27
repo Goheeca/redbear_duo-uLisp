@@ -74,6 +74,7 @@ int string_reader () {
 
 int fnc (String data) {
     STR_POSITION = 0;
+    data.concat("\n");
     STR_READER = data.c_str();
     object *lisp_data = read(string_reader);
     object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("fnc")), cons(lisp_data, NULL)), NULL));
