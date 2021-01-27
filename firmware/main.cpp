@@ -8,7 +8,7 @@ int fnc(String data);
 
 void setup () {
   Serial.begin(9600);
-  waitUntil(Serial.isConnected);
+  //waitUntil(Serial.isConnected);
   ulisp_setup();
   Particle.function("lisp", fnc);
 }
