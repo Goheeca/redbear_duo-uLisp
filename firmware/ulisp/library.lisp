@@ -3,5 +3,5 @@
 (pinmode 7 1)
 (defun toggle () (digitalwrite 7 (not (digitalread 7))))
 (defun test (x) (print x))
-(defun fnc (data) (print data))
+(defun fnc (data) (publish "lisp" data))
 #include "core/ulisp-lisp-library.h"
