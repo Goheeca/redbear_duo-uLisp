@@ -43,10 +43,9 @@ object *fn_poke (object *args, object *env) {
 }
 
 object *fn_call_test (object *args, object *env) {
-  (void) env;
   char *buffer = "test\0\0";
   object *form = cons(newsymbol(pack40(buffer)), cons(first(args), NULL));
-  return eval(form, NULL);
+  return eval(form, env);
 }
 
 String STR_PARTICLE;
