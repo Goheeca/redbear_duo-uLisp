@@ -694,13 +694,13 @@ int fromradix40 (int n) {
   return 0;
 }
 
-int pack40 (char *buffer) {
+int pack40 (const char *buffer) {
   int x = 0;
   for (int i=0; i<6 && buffer[i]; i++) x = x * 40 + toradix40(buffer[i]);
   return x;
 }
 
-bool valid40 (char *buffer) {
+bool valid40 (const char *buffer) {
   for (int i=0; i<6; i++) if (toradix40(buffer[i]) == -1) return false;
   return true;
 }

@@ -203,7 +203,7 @@ void error (symbol_t fname, PGM_P string, object *symbol);
 void error2 (symbol_t fname, PGM_P string);
 object *newsymbol (symbol_t name);
 int longsymbol (char *buffer);
-int pack40 (char *buffer);
+int pack40 (const char *buffer);
 
 #define LOOKUP_TABLE_ENTRIES
 
