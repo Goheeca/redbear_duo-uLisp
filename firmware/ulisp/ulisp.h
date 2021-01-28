@@ -205,6 +205,10 @@ object *newsymbol (symbol_t name);
 int longsymbol (char *buffer);
 int pack40 (const char *buffer);
 
+object *number (int n);
+object *makefloat (float f);
+object *character (char c);
+
 #define LOOKUP_TABLE_ENTRIES
 
 #endif

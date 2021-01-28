@@ -2,17 +2,17 @@
 
 // Insert your own function definitions here
 
-enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, CALL_TEST, ENDFUNCTIONS};
+enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, NOW, ENDFUNCTIONS};
 
 object *fn_peek (object *args, object *env);
 object *fn_poke (object *args, object *env);
 object *fn_publish (object *args, object *env);
-object *fn_call_test (object *args, object *env);
+object *fn_now (object *args, object *env);
 
 extern const char string_fn_peek[] PROGMEM;
 extern const char string_fn_poke[] PROGMEM;
 extern const char string_fn_publish[] PROGMEM;
-extern const char string_fn_call_test[] PROGMEM;
+extern const char string_fn_now[] PROGMEM;
 
 #ifdef LOOKUP_TABLE_ENTRIES
 #undef LOOKUP_TABLE_ENTRIES
@@ -21,7 +21,7 @@ extern const char string_fn_call_test[] PROGMEM;
     { string_fn_peek, fn_peek, 0x11 }, \
     { string_fn_poke, fn_poke, 0x22 }, \
     { string_fn_publish, fn_publish, 0x22 }, \
-    { string_fn_call_test, fn_call_test, 0x11 }, \
+    { string_fn_now, fn_now, 0x00 }, \
 
 #else // __ULISP_C_H
 
@@ -42,9 +42,10 @@ object *fn_poke (object *args, object *env) {
   return val;
 }
 
-object *fn_call_test (object *args, object *env) {
-  object *form = cons(newsymbol(pack40("test\0\0")), cons(first(args), NULL));
-  return eval(form, env);
+object *fn_now (object *args, object *env) {
+  (void) env;
+  object *now = cons(number(Time.hour()), cons(number(Time.minute()), cons(number((Time.second)()), NULL)));
+  return now;
 }
 
 String STR_PARTICLE;
@@ -78,7 +79,7 @@ int fnc (String data) {
     data.replace(")", " )");
     STR_READER = data.c_str();
     object *lisp_data = read(string_reader);
-    object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("fnc\0\0\0")), cons(lisp_data, NULL)), NULL));
+    object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("cloud\0")), cons(lisp_data, NULL)), NULL));
     object *result = eval(form, NULL);
     if (symbolp(result) && result->name == NOTHING) {
         return -1;
@@ -89,6 +90,6 @@ int fnc (String data) {
 const char string_fn_peek[] PROGMEM = "peek";
 const char string_fn_poke[] PROGMEM = "poke";
 const char string_fn_publish[] PROGMEM = "publish";
-const char string_fn_call_test[] PROGMEM = "call-test";
+const char string_fn_now[] PROGMEM = "now";
 
 #endif
