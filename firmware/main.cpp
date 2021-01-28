@@ -1,3 +1,4 @@
+#define PARTICLE_USING_DEPRECATED_API 1
 #include <Particle.h>
 #include "ulisp/ulisp.h"
 

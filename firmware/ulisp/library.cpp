@@ -44,7 +44,7 @@ object *fn_poke (object *args, object *env) {
 
 object *fn_now (object *args, object *env) {
   (void) env;
-  object *now = cons(number(Time.hour()), cons(number(Time.minute()), cons(number((Time.second)()), NULL)));
+  object *now = cons(number(Time.hour(Time.local())), cons(number(Time.minute(Time.local())), cons(number((Time.second)(Time.local())), NULL)));
   return now;
 }
 
