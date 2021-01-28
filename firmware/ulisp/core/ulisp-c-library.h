@@ -1,6 +1,8 @@
 #ifndef __ULISP_C_H
 #define __ULISP_C_H
 
+#define PARTICLE_USING_DEPRECATED_API 1
+
 #include "../ulisp.h"
 
 object *number (int n);
