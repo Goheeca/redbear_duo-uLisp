@@ -2,17 +2,19 @@
 
 // Insert your own function definitions here
 
-enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, NOW, ENDFUNCTIONS};
+enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, NOW, ZONE, ENDFUNCTIONS};
 
 object *fn_peek (object *args, object *env);
 object *fn_poke (object *args, object *env);
 object *fn_publish (object *args, object *env);
 object *fn_now (object *args, object *env);
+object *fn_zone (object *args, object *env);
 
 extern const char string_fn_peek[] PROGMEM;
 extern const char string_fn_poke[] PROGMEM;
 extern const char string_fn_publish[] PROGMEM;
 extern const char string_fn_now[] PROGMEM;
+extern const char string_fn_zone[] PROGMEM;
 
 #ifdef LOOKUP_TABLE_ENTRIES
 #undef LOOKUP_TABLE_ENTRIES
@@ -22,6 +24,7 @@ extern const char string_fn_now[] PROGMEM;
     { string_fn_poke, fn_poke, 0x22 }, \
     { string_fn_publish, fn_publish, 0x22 }, \
     { string_fn_now, fn_now, 0x00 }, \
+    { string_fn_zone, fn_zone, 0x11 }, \
 
 #else // __ULISP_C_H
 
@@ -87,9 +90,17 @@ int fnc (String data) {
     return result != nil ? 1 : 0;
 }
 
+object *fn_zone (object *args, object *env) {
+  (void) env;
+  float zone = checkintfloat(ZONE, first(args));
+  Time.zone(zone);
+  return nil;
+}
+
 const char string_fn_peek[] PROGMEM = "peek";
 const char string_fn_poke[] PROGMEM = "poke";
 const char string_fn_publish[] PROGMEM = "publish";
 const char string_fn_now[] PROGMEM = "now";
+const char string_fn_zone[] PROGMEM = "zone";
 
 #endif
