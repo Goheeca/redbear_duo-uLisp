@@ -5144,7 +5144,7 @@ int gserial () {
   }
 #if defined(lineeditor)
   while (!KybdAvailable) {
-    while (!Serial.available()) Particle.process();
+    while (!Serial.available()) process_system();
     char temp = Serial.read();
     processkey(temp);
   }
@@ -5153,7 +5153,7 @@ int gserial () {
   WritePtr = 0;
   return '\n';
 #else
-  while (!Serial.available()) Particle.process();
+  while (!Serial.available()) process_system();
   char temp = Serial.read();
   if (temp != '\n') pserial(temp);
   return temp;

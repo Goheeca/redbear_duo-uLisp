@@ -9,6 +9,7 @@ object *fn_poke (object *args, object *env);
 object *fn_publish (object *args, object *env);
 object *fn_now (object *args, object *env);
 object *fn_zone (object *args, object *env);
+void process_system();
 
 extern const char string_fn_peek[] PROGMEM;
 extern const char string_fn_poke[] PROGMEM;
@@ -95,6 +96,23 @@ object *fn_zone (object *args, object *env) {
   float zone = checkintfloat(ZONE, first(args));
   Time.zone(zone);
   return nil;
+}
+
+int lastHour = -1;
+int lastMinute = -1;
+int lastSecond = -1;
+void process_system() {
+    Particle.process();
+    int h = Time.hour();
+    int min = Time.minute();
+    int s = (Time.second)();
+    if (Time.isValid() && (lastHour != h || lastMinute != min || lastSecond != s)) {
+        lastHour = h;
+        lastMinute = min;
+        lastSecond = s;
+        object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("alarm\0")), NULL), NULL));
+        eval(form, NULL);
+    }
 }
 
 const char string_fn_peek[] PROGMEM = "peek";
