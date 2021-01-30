@@ -110,7 +110,7 @@ void process_system() {
         lastHour = h;
         lastMinute = min;
         lastSecond = s;
-        object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("alarm\0")), NULL), NULL));
+        object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("alarm\0")), cons(number(h), cons(number(min), cons(number(s), NULL)))), NULL));
         eval(form, NULL);
     }
 }
