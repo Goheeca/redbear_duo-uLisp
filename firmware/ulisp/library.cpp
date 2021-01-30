@@ -103,9 +103,10 @@ int lastMinute = -1;
 int lastSecond = -1;
 void process_system() {
     Particle.process();
-    int h = Time.hour();
-    int min = Time.minute();
-    int s = (Time.second)();
+    int local = Time.local();
+    int h = Time.hour(local);
+    int min = Time.minute(local);
+    int s = (Time.second)(local);
     if (Time.isValid() && (lastHour != h || lastMinute != min || lastSecond != s)) {
         lastHour = h;
         lastMinute = min;
