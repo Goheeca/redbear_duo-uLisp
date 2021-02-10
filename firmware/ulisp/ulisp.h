@@ -24,6 +24,7 @@ typedef uint16_t uint16;
 
 extern uint8_t End;
 extern jmp_buf toplevel_handler;
+extern jmp_buf *handler;
 
 void autorunimage ();
 
@@ -192,6 +193,9 @@ void prin1object (object *form, pfun_t pfun);
 
 // Forward references
 
+enum flag { PRINTREADABLY, RETURNFLAG, ESCAPE, EXITEDITOR, LIBRARYLOADED, NOESC, MUFFLEERRORS };
+extern volatile char Flags_;
+extern object *GCStack;
 extern object *tee;
 object *tf_progn (object *form, object *env);
 object *eval (object *form, object *env);

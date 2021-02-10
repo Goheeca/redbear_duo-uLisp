@@ -4,13 +4,13 @@
 SYSTEM_MODE(AUTOMATIC)
 SYSTEM_THREAD(ENABLED)
 
-int fnc(String data);
+int cloud(String data);
 bool init = false;
 
 void setup () {
   Serial.begin(9600);
   ulisp_setup();
-  Particle.function("lisp", fnc);
+  Particle.function("lisp", cloud);
 }
 
 void loop () {

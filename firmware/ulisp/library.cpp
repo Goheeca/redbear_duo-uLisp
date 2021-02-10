@@ -77,18 +77,37 @@ int string_reader () {
   return (c != 0) ? c : -1;
 }
 
-int fnc (String data) {
+int cloud (String data) {
     STR_POSITION = 0;
     data.concat("\n");
     data.replace(")", " )");
     STR_READER = data.c_str();
-    object *lisp_data = read(string_reader);
-    object *form = cons(symbol(IGNOREERRORS), cons(cons(newsymbol(pack40("cloud\0")), cons(lisp_data, NULL)), NULL));
-    object *result = eval(form, NULL);
-    if (symbolp(result) && result->name == NOTHING) {
-        return -1;
+
+    object *current_GCStack = GCStack;
+    jmp_buf dynamic_handler;
+    jmp_buf *previous_handler = handler;
+    handler = &dynamic_handler;
+    object *result = nil;
+
+    bool muffled = tstflag(MUFFLEERRORS);
+    setflag(MUFFLEERRORS);
+    volatile int signaled_error = -2;
+    if (!setjmp(dynamic_handler)) {
+       object *lisp_data = read(string_reader);
+       signaled_error = -1;
+       object *form = cons(newsymbol(pack40("cloud\0")), cons(lisp_data, NULL));
+       result = eval(form, NULL);
+       signaled_error = 0;
+    } else {
+      GCStack = current_GCStack;
     }
-    return result != nil ? 1 : 0;
+    handler = previous_handler;
+    if (!muffled) clrflag(MUFFLEERRORS);
+
+    switch (signaled_error) {
+        case 0: return result != nil ? 1 : 0;
+        default: return signaled_error;
+    }
 }
 
 object *fn_zone (object *args, object *env) {

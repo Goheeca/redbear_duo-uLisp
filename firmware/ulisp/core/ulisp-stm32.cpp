@@ -80,7 +80,6 @@ char LastChar = 0;
 char LastPrint = 0;
 
 // Flags
-enum flag { PRINTREADABLY, RETURNFLAG, ESCAPE, EXITEDITOR, LIBRARYLOADED, NOESC, MUFFLEERRORS };
 volatile char Flags_ = 0b00001; // PRINTREADABLY set by default
 
 // Forward references
