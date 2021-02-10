@@ -5346,6 +5346,9 @@ void ulisp_setup () {
   initenv();
   initsleep();
   initgfx();
+}
+
+void ulisp_banner () {
   pfstring(PSTR("uLisp 3.3 "), pserial); pln(pserial);
 }
 
@@ -5391,6 +5394,12 @@ void ulisp_loop () {
   repl(NULL);
 }
 
+void ulisp_load_library() {
+  #if defined(lisplibrary)
+  if (!tstflag(LIBRARYLOADED)) { setflag(LIBRARYLOADED); loadfromlibrary(NULL); }
+  #endif
+}
+
 void ulisp_reset() {
   // Come here after error
   delay(100); while (Serial.available()) Serial.read();
@@ -5399,7 +5408,5 @@ void ulisp_reset() {
   #if defined(sdcardsupport)
   SDpfile.close(); SDgfile.close();
   #endif
-  #if defined(lisplibrary)
-  if (!tstflag(LIBRARYLOADED)) { setflag(LIBRARYLOADED); loadfromlibrary(NULL); }
-  #endif
+  ulisp_load_library();
 }

@@ -5,17 +5,22 @@ SYSTEM_MODE(AUTOMATIC)
 SYSTEM_THREAD(ENABLED)
 
 int fnc(String data);
+bool init = false;
 
 void setup () {
   Serial.begin(9600);
-  //waitUntil(Serial.isConnected);
   ulisp_setup();
   Particle.function("lisp", fnc);
 }
 
 void loop () {
   ULISP_SETUP_EXCEPTION_HANDLING
-  delay(100); while (Serial.available()) Serial.read();
+  if (!init) {
+    ulisp_load_library();
+    while (!Serial.isConnected()) process_system();
+    ulisp_banner();
+    init = true;
+  }
   ulisp_reset();
   repl(NULL);
 }

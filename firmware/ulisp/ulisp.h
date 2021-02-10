@@ -153,8 +153,11 @@ typedef int PinMode_;
   }
 
 void ulisp_setup ();
+void ulisp_banner ();
+void ulisp_load_library();
 void ulisp_reset ();
 void repl (object *env);
+void process_system();
 
 // Forward declarations
 
