@@ -2,13 +2,16 @@
 
 // Insert your own function definitions here
 
-enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, NOW, ZONE, ENDFUNCTIONS};
+enum function_ { PEEK = _ENDFUNCTIONS, POKE, PUBLISH, NOW, ZONE, RGB_CONTROL, RGB_COLOR, RGB_BRIGHTNESS, ENDFUNCTIONS};
 
 object *fn_peek (object *args, object *env);
 object *fn_poke (object *args, object *env);
 object *fn_publish (object *args, object *env);
 object *fn_now (object *args, object *env);
 object *fn_zone (object *args, object *env);
+object *fn_rgb_control (object *args, object *env);
+object *fn_rgb_color (object *args, object *env);
+object *fn_rgb_brightness (object *args, object *env);
 void process_system();
 
 extern const char string_fn_peek[] PROGMEM;
@@ -16,6 +19,10 @@ extern const char string_fn_poke[] PROGMEM;
 extern const char string_fn_publish[] PROGMEM;
 extern const char string_fn_now[] PROGMEM;
 extern const char string_fn_zone[] PROGMEM;
+
+extern const char string_fn_rgb_control[] PROGMEM;
+extern const char string_fn_rgb_color[] PROGMEM;
+extern const char string_fn_rgb_brightness[] PROGMEM;
 
 #ifdef LOOKUP_TABLE_ENTRIES
 #undef LOOKUP_TABLE_ENTRIES
@@ -26,6 +33,9 @@ extern const char string_fn_zone[] PROGMEM;
     { string_fn_publish, fn_publish, 0x22 }, \
     { string_fn_now, fn_now, 0x00 }, \
     { string_fn_zone, fn_zone, 0x11 }, \
+    { string_fn_rgb_control, fn_rgb_control, 0x01 }, \
+    { string_fn_rgb_color, fn_rgb_color, 0x33 }, \
+    { string_fn_rgb_brightness, fn_rgb_brightness, 0x01 }, \
 
 #else // __ULISP_C_H
 
@@ -34,12 +44,14 @@ extern const char string_fn_zone[] PROGMEM;
 
 object *fn_peek (object *args, object *env) {
   (void) env;
+  checkargs(PEEK, args);
   int addr = checkinteger(PEEK, first(args));
   return number(*(int *)addr);
 }
 
 object *fn_poke (object *args, object *env) {
   (void) env;
+  checkargs(POKE, args);
   int addr = checkinteger(POKE, first(args));
   object *val = second(args);
   *(int *)addr = checkinteger(POKE, val);
@@ -48,6 +60,7 @@ object *fn_poke (object *args, object *env) {
 
 object *fn_now (object *args, object *env) {
   (void) env;
+  checkargs(NOW, args);
   object *now = cons(number(Time.hour(Time.local())), cons(number(Time.minute(Time.local())), cons(number((Time.second)(Time.local())), NULL)));
   return now;
 }
@@ -59,6 +72,7 @@ void STR_PARTICLE_APPEND(char c) {
 
 object *fn_publish (object *args, object *env) {
   (void) env;
+  checkargs(PUBLISH, args);
   if (stringp(first(args))) {
     STR_PARTICLE = String("");
     prin1object(first(args), STR_PARTICLE_APPEND);
@@ -112,6 +126,7 @@ int cloud (String data) {
 
 object *fn_zone (object *args, object *env) {
   (void) env;
+  checkargs(ZONE, args);
   float zone = checkintfloat(ZONE, first(args));
   Time.zone(zone);
   return nil;
@@ -135,10 +150,44 @@ void process_system() {
     }
 }
 
+object *fn_rgb_control (object *args, object *env) {
+  (void) env;
+  checkargs(RGB_CONTROL, args);
+  if (nil != args) {
+    bool ctrl = first(args) != nil;
+    RGB.control(ctrl);
+  }
+  return RGB.controlled() ? tee : nil;
+}
+
+object *fn_rgb_color (object *args, object *env) {
+  (void) env;
+  checkargs(RGB_COLOR, args);
+  int red = checkinteger(RGB_COLOR, first(args));
+  int green = checkinteger(RGB_COLOR, second(args));
+  int blue = checkinteger(RGB_COLOR, third(args));
+  RGB.color(red, green, blue);
+  return tee;
+}
+
+object *fn_rgb_brightness (object *args, object *env) {
+  (void) env;
+  checkargs(RGB_BRIGHTNESS, args);
+  if (nil != args) {
+    int bright = checkinteger(RGB_BRIGHTNESS, first(args));
+    RGB.brightness(bright);
+  }
+  return number(RGB.brightness());
+}
+
+
 const char string_fn_peek[] PROGMEM = "peek";
 const char string_fn_poke[] PROGMEM = "poke";
 const char string_fn_publish[] PROGMEM = "publish";
 const char string_fn_now[] PROGMEM = "now";
 const char string_fn_zone[] PROGMEM = "zone";
+const char string_fn_rgb_control[] PROGMEM = "rgb-control";
+const char string_fn_rgb_color[] PROGMEM = "rgb";
+const char string_fn_rgb_brightness[] PROGMEM = "rgb-brightness";
 
 #endif
